@@ -334,7 +334,7 @@ func createPostHandler(db *sql.DB) http.HandlerFunc {
 
 func saveImage(file multipart.File, header *multipart.FileHeader) (string, error) {
 	// Dosya boyutunu kontrol et (maksimum 20 MB)
-	const maxFileSize = 20 << 20 // 20 MB
+	const maxFileSize = 15 << 20 // 20 MB
 	if header.Size > maxFileSize {
 		return "", fmt.Errorf("dosya boyutu çok büyük (maksimum 20 MB)")
 	}
