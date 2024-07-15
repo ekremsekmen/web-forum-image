@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .create-post, .post {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .create-post {
+            margin-bottom: 40px;
+        }
+        .create-post h2, .post h2 {
+            margin-top: 0;
+            color: #1da1f2;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .create-post form, .post .actions form, .comment-form form {
+            width: 100%;
+        }
+        .create-post label, .post .meta span, .comment p {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .create-post input[type="text"], 
+        .create-post textarea,
+        .post input[type="text"], 
+        .post textarea,
+        .comment-form textarea {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            resize: vertical;
+        }
+        .create-post textarea, 
+        .post textarea,
+        .comment-form textarea {
+            height: 120px;
+        }
+        .create-post input[type="submit"], 
+        .post .actions button,
+        .comment-form input[type="submit"] {
+            background-color: #1da1f2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .create-post input[type="submit"]:hover, 
+        .post .actions button:hover,
+        .comment-form input[type="submit"]:hover {
+            background-color: #0d91e5;
+        }
+        .post .actions {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .post .actions button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #1da1f2;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .post .actions button:hover {
+            background-color: #0d91e5;
+        }
+        .post .comments {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+        .comment {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .comment p {
+            margin-bottom: 5px;
+        }
+        .comment-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        .comment-form textarea {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            resize: vertical;
+            height: 100px;
+        }
+        .comment-form input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .comment-form input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Forum</h1>
+        <div class="create-post">
+            <h2>Create a New Post</h2>
+            <form action="/createPost" method="post" enctype="multipart/form-data">
+                <label for="title">Title:</label><br>
+                <input type="text" id="title" name="title" required><br><br>
+                <label for="content">Content:</label><br>
+                <textarea id="content" name="content" rows="6" required></textarea><br><br>
+                <label for="image">Image:</label><br>
+                <input type="file" id="image" name="image"><br><br>
+                <input type="submit" value="Create Post">
+            </form>
+        </div>
+        {{ range .Posts }}
+            <div class="post">
+                <h2>{{ .Title }}</h2>
+                <p>{{ .Content }}</p>
+                {{ if .ImageURL }}
+                    <img src="/uploads/{{.ImageURL}}" alt="Post Image" />
+                {{ end }}
+                <div class="meta">
+                    <span>Posted by {{ .Username }} on {{ .CreatedAt }}</span>
+                    <span>Likes: {{ .Likes }}</span>
+                    <span>Dislikes: {{ .Dislikes }}</span>
+                </div>
+                <div class="actions">
+                    <form action="/like" method="post">
+                        <input type="hidden" name="post_id" value="{{ .ID }}">
+                        <button type="submit">Like</button>
+                    </form>
+                    <form action="/dislike" method="post">
+                        <input type="hidden" name="post_id" value="{{ .ID }}">
+                        <button type="submit">Dislike</button>
+                    </form>
+                </div>
+                <div class="comments">
+                    <h3>Comments</h3>
+                    {{ if .Comments }}
+                        {{ range .Comments }}
+                            <div class="comment">
+                                <p>{{ .Content }}</p>
+                                <p>Comment by {{ .Username }} on {{ .CreatedAt }}</p>
+                            </div>
+                        {{ end }}
+                    {{ else }}
+                        <p>No comments yet.</p>
+                    {{ end }}
+                    <div class="comment-form">
+                        <form action="/comment" method="post">
+                            <input type="hidden" name="post_id" value="{{ .ID }}">
+                            <label for="comment">Add a comment:</label><br>
+                            <textarea id="comment" name="content" rows="3" required></textarea><br>
+                            <input type="submit" value="Post Comment">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {{ end }}
+    </div>
+</body>
+</html>
