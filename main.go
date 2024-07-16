@@ -333,38 +333,33 @@ func createPostHandler(db *sql.DB) http.HandlerFunc {
 }
 
 func saveImage(file multipart.File, header *multipart.FileHeader) (string, error) {
-	// Dosya boyutunu kontrol et (maksimum 20 MB)
-	const maxFileSize = 15 << 20 // 20 MB
+	const maxFileSize = 15 << 20
 	if header.Size > maxFileSize {
 		return "", fmt.Errorf("dosya boyutu çok büyük (maksimum 20 MB)")
 	}
 
-	// Dosyanın içeriğini oku ve ilk 512 byte'ı al
 	buffer := make([]byte, 512)
 	_, err := file.Read(buffer)
 	if err != nil {
 		return "", err
 	}
 
-	// Dosya türünü belirle
 	filetype := http.DetectContentType(buffer)
 	switch filetype {
 	case "image/jpeg", "image/jpg", "image/png", "image/gif":
-		// Geçerli dosya türleri
+
 	default:
 		return "", fmt.Errorf("sadece JPG, JPEG, PNG ve GIF dosyaları yüklenebilir")
 	}
 
-	// Dosya uzantısını kontrol et
 	ext := filepath.Ext(header.Filename)
 	switch ext {
 	case ".jpg", ".jpeg", ".png", ".gif":
-		// Geçerli dosya uzantıları
+
 	default:
 		return "", fmt.Errorf("sadece JPG, JPEG, PNG ve GIF dosyaları yüklenebilir")
 	}
 
-	// Dosya adını oluştur
 	imagePath := filepath.Join("./uploads", header.Filename)
 	out, err := os.Create(imagePath)
 	if err != nil {
@@ -372,14 +367,12 @@ func saveImage(file multipart.File, header *multipart.FileHeader) (string, error
 	}
 	defer out.Close()
 
-	// Dosyanın içeriğini tekrar oku ve tamamını yaz
-	file.Seek(0, 0) // Dosyanın başına dön
+	file.Seek(0, 0)
 	_, err = io.Copy(out, file)
 	if err != nil {
 		return "", err
 	}
 
-	// Geriye dosya adını döndür (yol değil)
 	return header.Filename, nil
 }
 
